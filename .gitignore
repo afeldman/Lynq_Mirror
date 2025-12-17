@@ -1,0 +1,26 @@
+# Deno
+deno.lock
+
+# Dependencies (legacy Node.js - only if needed)
+node_modules/
+package-lock.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Logs
+npm-debug.log*
+deno.log*
+*.log

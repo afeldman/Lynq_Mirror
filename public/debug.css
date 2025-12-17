@@ -1,0 +1,155 @@
+:root {
+  --debug-log-width: 420px;
+}
+
+body.debug-page {
+  background: #020202;
+}
+
+body.debug-page #face-header {
+  max-width: calc(100% - var(--debug-log-width));
+}
+
+body.debug-page #status {
+  left: calc((100% - var(--debug-log-width)) / 2);
+}
+
+#debug-layout {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--debug-log-width);
+  grid-template-rows: 1fr;
+}
+
+body.debug-page #canvas-container {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: 100%;
+}
+
+#debug-log-panel {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 8, 8, 0.92);
+  display: flex;
+  flex-direction: column;
+  padding-top: 4.4rem;
+  padding-right: 1.1rem;
+  padding-left: 1.1rem;
+}
+
+.debug-log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.debug-log-header h1 {
+  font-size: 1.25rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.debug-log-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.debug-log-count {
+  font-size: 0.9rem;
+  color: rgba(230, 230, 230, 0.75);
+}
+
+#debug-log-clear,
+#debug-log-download {
+  appearance: none;
+  background: rgba(82, 139, 255, 0.16);
+  border: 1px solid rgba(82, 139, 255, 0.55);
+  color: #f3f6ff;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.45rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+#debug-log-clear:hover,
+#debug-log-download:hover {
+  background: rgba(82, 139, 255, 0.32);
+  border-color: rgba(82, 139, 255, 0.75);
+}
+
+.debug-log-output {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-bottom: 1.2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.debug-log-entry {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.65rem 0;
+}
+
+.debug-log-entry:last-child {
+  border-bottom: none;
+}
+
+.debug-log-entry h2 {
+  font-size: 1rem;
+  margin: 0 0 0.3rem 0;
+  font-weight: 600;
+}
+
+.debug-log-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.78rem;
+  color: rgba(210, 224, 255, 0.75);
+}
+
+.debug-log-meta span {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.4rem;
+}
+
+.debug-log-details {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  background: rgba(12, 12, 12, 0.75);
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.45rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.debug-log-entry--blendshape h2 {
+  color: #8ab4ff;
+}
+
+.debug-log-entry--a2f h2 {
+  color: #9ef8c1;
+}
+
+.debug-log-entry--warning h2 {
+  color: #fdd39a;
+}
+
+.debug-log-entry--error h2 {
+  color: #f7a6a6;
+}
+
+.debug-log-placeholder {
+  padding: 0.75rem 0;
+  color: rgba(220, 220, 220, 0.6);
+  font-size: 0.9rem;
+}

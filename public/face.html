@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mirror — Microphone Driven Face</title>
+    <link rel="stylesheet" href="/face.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.168.0/build/three.module.js",
+          "three/examples/jsm/": "https://unpkg.com/three@0.168.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header id="face-header">
+      <nav>
+        <a href="/">Home</a>
+        <a href="/face" aria-current="page">Face</a>
+        <a href="/settings">Settings</a>
+        <a href="/nvidia">NVIDIA</a>
+        <a href="/debug">Debug</a>
+      </nav>
+    </header>
+    <div id="canvas-container"></div>
+    <audio id="assistant-audio" autoplay playsinline muted></audio>
+    <script type="module" src="/face.js"></script>
+  </body>
+</html>

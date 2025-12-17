@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Talk to Character - Magic Mirror</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-family: "Segoe UI", sans-serif;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: stretch;
+      }
+
+      .video-section {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 500px;
+      }
+
+      canvas {
+        width: 100%;
+        height: 100%;
+      }
+
+      .controls-section {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      h1 {
+        margin-top: 0;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+      }
+
+      .character-select {
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+      }
+
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 6px;
+        border: none;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        margin-bottom: 1rem;
+      }
+
+      select option {
+        background: #333;
+        color: white;
+      }
+
+      textarea::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .voice-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: 2px solid white;
+        padding: 1rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+      }
+
+      .voice-btn:hover:not(:disabled) {
+        transform: scale(1.05);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      }
+
+      .voice-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .voice-btn.recording {
+        background: #ff4757;
+        animation: pulse 1s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(255, 71, 87, 0);
+        }
+      }
+
+      .voice-status {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        border-radius: 6px;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .voice-response {
+        background: rgba(100, 150, 255, 0.2);
+        padding: 1rem;
+        border-radius: 6px;
+        min-height: 100px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow-y: auto;
+      }
+
+      .controls-bottom {
+        margin-top: auto;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        .video-section {
+          min-height: 300px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="video-section">
+        <canvas id="canvas"></canvas>
+      </div>
+
+      <div class="controls-section">
+        <div>
+          <h1>💬 Talk to Character</h1>
+
+          <div class="character-select">
+            <label for="character-select">Select Character:</label>
+            <select id="character-select">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="system-prompt">System Prompt (Optional):</label>
+            <textarea
+              id="system-prompt"
+              rows="4"
+              placeholder="Define character personality and behavior..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="controls-bottom">
+          <button class="voice-btn" id="start-btn">
+            🎤 Start Conversation
+          </button>
+
+          <div class="voice-status" id="status">
+            Ready. Click to start speaking!
+          </div>
+
+          <div class="voice-response" id="response"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { VoiceConversation } from "./voice-conversation.js";
+      import { loadFBXFromURL } from "./main.js";
+
+      const canvas = document.getElementById("canvas");
+      const characterSelect = document.getElementById("character-select");
+      const systemPromptEl = document.getElementById("system-prompt");
+      const startBtn = document.getElementById("start-btn");
+      const statusEl = document.getElementById("status");
+      const responseEl = document.getElementById("response");
+
+      let conversation = null;
+      let sceneReady = false;
+
+      // Load characters
+      async function loadCharacters() {
+        try {
+          const response = await fetch("/api/characters");
+          const characters = await response.json();
+
+          characterSelect.innerHTML = "";
+          characters.forEach((char) => {
+            const option = document.createElement("option");
+            option.value = char.url;
+            option.textContent = char.name;
+            characterSelect.appendChild(option);
+          });
+
+          if (characters.length > 0) {
+            characterSelect.value = characters[0].url;
+            await loadCharacter(characters[0].url);
+          }
+        } catch (err) {
+          statusEl.textContent = "❌ Failed to load characters";
+        }
+      }
+
+      async function loadCharacter(url) {
+        try {
+          statusEl.textContent = "Loading character...";
+          await loadFBXFromURL(url, "Character");
+          sceneReady = true;
+          statusEl.textContent = "Ready. Click to start speaking!";
+        } catch (err) {
+          statusEl.textContent = `❌ Failed to load character: ${err.message}`;
+        }
+      }
+
+      characterSelect.addEventListener("change", (e) => {
+        if (e.target.value) {
+          loadCharacter(e.target.value);
+        }
+      });
+
+      // Voice conversation
+      startBtn.addEventListener("click", async () => {
+        if (!sceneReady) {
+          statusEl.textContent = "❌ Character not loaded yet";
+          return;
+        }
+
+        if (!conversation) {
+          try {
+            conversation = new VoiceConversation();
+            await conversation.initialize();
+          } catch (err) {
+            statusEl.textContent = `❌ Microphone error: ${err.message}`;
+            conversation = null;
+            return;
+          }
+        }
+
+        startBtn.disabled = true;
+        startBtn.classList.add("recording");
+
+        try {
+          const result = await conversation.conversationLoop({
+            systemPrompt: systemPromptEl.value,
+            character: "mark_v2_3",
+            onStatusChange: (status) => {
+              statusEl.textContent = status;
+            },
+            onResponseText: (text) => {
+              responseEl.textContent = `AI: ${text}`;
+            },
+          });
+
+          responseEl.innerHTML += `<br><br><small>Tokens: ${
+            result.tokens?.completion || 0
+          }</small>`;
+        } catch (err) {
+          statusEl.textContent = `❌ Error: ${
+            err instanceof Error ? err.message : "Unknown"
+          }`;
+          responseEl.textContent = "Conversation failed. Try again.";
+        } finally {
+          startBtn.disabled = false;
+          startBtn.classList.remove("recording");
+          if (conversation) {
+            conversation.dispose();
+            conversation = null;
+          }
+        }
+      });
+
+      // Initialize
+      loadCharacters();
+    </script>
+  </body>
+</html>

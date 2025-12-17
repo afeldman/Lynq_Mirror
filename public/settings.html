@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Assistant Settings</title>
+    <link rel="stylesheet" href="/settings.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.168.0/build/three.module.js",
+          "three/examples/jsm/": "https://unpkg.com/three@0.168.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="header-inner">
+        <h1>AI Assistant Settings</h1>
+        <nav>
+          <a href="/">Home</a>
+          <a href="/face">Face</a>
+          <a href="/settings" aria-current="page">Settings</a>
+          <a href="/nvidia">NVIDIA</a>
+          <a href="/debug">Debug</a>
+        </nav>
+      </div>
+    </header>
+    <main class="page-main">
+      <section class="status-section">
+        <div id="status" class="status-banner">Loading assistant configuration…</div>
+        <div id="unsaved" class="unsaved-note" hidden>Unsaved changes</div>
+      </section>
+      <form id="assistant-settings-form" class="settings-layout">
+        <section class="assistant-grid">
+          <aside class="settings-sidebar">
+            <article class="settings-card viseme-card">
+              <h2>Viseme blendshape tuning</h2>
+              <p class="section-summary">
+                Shape how realtime visemes map to morph targets before they reach the face. Adjust strength, delay, and smoothing
+                until lip-sync feels natural.
+              </p>
+              <label for="viseme-strength" class="field slider-field">
+                <div class="field-header">
+                  <span>Blendshape strength</span>
+                  <span class="range-value" data-display-for="viseme-strength"></span>
+                </div>
+                <input id="viseme-strength" name="visemeStrength" type="range" min="0.4" max="1.6" step="0.05" />
+                <small>Scales each viseme recipe before it is applied to the character.</small>
+              </label>
+              <label for="viseme-smoothing" class="field slider-field">
+                <div class="field-header">
+                  <span>Smoothing</span>
+                  <span class="range-value" data-display-for="viseme-smoothing"></span>
+                </div>
+                <input id="viseme-smoothing" name="visemeSmoothing" type="range" min="0" max="1" step="0.05" />
+                <small>Higher values ease between visemes for softer, more organic motion.</small>
+              </label>
+              <label for="viseme-delay" class="field slider-field">
+                <div class="field-header">
+                  <span>Onset delay</span>
+                  <span class="range-value" data-display-for="viseme-delay"></span>
+                </div>
+                <input id="viseme-delay" name="visemeDelay" type="range" min="0" max="400" step="10" />
+                <small>Offsets viseme triggers to better align with the audio track.</small>
+              </label>
+              <label for="viseme-hold" class="field slider-field">
+                <div class="field-header">
+                  <span>Release</span>
+                  <span class="range-value" data-display-for="viseme-hold"></span>
+                </div>
+                <input id="viseme-hold" name="visemeHold" type="range" min="80" max="480" step="10" />
+                <small>Controls how long a viseme lingers before relaxing back to neutral.</small>
+              </label>
+              <p class="viseme-editor-note">
+                Tune each viseme’s recipe to match your character’s morph targets. Blendshape names must exactly match the
+                FBX blendshape channels.
+              </p>
+              <div id="viseme-editor" class="viseme-editor" aria-live="polite"></div>
+            </article>
+          </aside>
+          <div class="settings-main">
+            <article class="settings-card assistant-card">
+              <h2>Configure the realtime assistant</h2>
+              <p class="section-summary">
+                Enter your realtime-enabled OpenAI API key, choose a default voice, configure the wake phrase, and personalise the
+                mirror assistant.
+              </p>
+              <div class="assistant-form">
+                <label for="assistant-name" class="field">
+                  <span>Assistant name</span>
+                  <input id="assistant-name" name="name" type="text" autocomplete="off" placeholder="Mirror" />
+                </label>
+                <label for="assistant-hotword" class="field">
+                  <span>Hotword</span>
+                  <input id="assistant-hotword" name="hotword" type="text" autocomplete="off" placeholder="Mirror" />
+                  <small>Say “Hey &lt;hotword&gt;” to start the realtime session. “Hey Mirror” always works as a fallback.</small>
+                </label>
+              <label for="assistant-api-key" class="field">
+                <span>OpenAI API key</span>
+                <input
+                  id="assistant-api-key"
+                  name="apiKey"
+                    type="password"
+                    placeholder="sk-..."
+                    autocomplete="off"
+                    spellcheck="false"
+                  />
+                <small>Stored only in this browser via localStorage.</small>
+              </label>
+              <label for="assistant-enable-audio2face" class="toggle-field">
+                <div class="toggle-text">
+                  <span>Enable NVIDIA Audio2Face API</span>
+                  <small>Use NVIDIA's cloud blendshape service instead of realtime visemes.</small>
+                </div>
+                <input type="checkbox" id="assistant-enable-audio2face" name="nvidiaEnable" />
+              </label>
+              <label for="assistant-audio2face-key" class="field">
+                <span>Audio2Face API key</span>
+                <input
+                  id="assistant-audio2face-key"
+                  name="nvidiaApiKey"
+                  type="password"
+                  placeholder="nvapi-..."
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+                <small>Stored locally. Obtain from NVIDIA's API catalog.</small>
+              </label>
+              <label for="assistant-audio2face-function" class="field">
+                <span>Audio2Face function ID</span>
+                <input
+                  id="assistant-audio2face-function"
+                  name="nvidiaFunctionId"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="8efc55f5-6f00-424e-afe9-26212cd2c630"
+                  spellcheck="false"
+                />
+                <small>Select the function for your chosen Audio2Face character.</small>
+              </label>
+              <label for="assistant-audio2face-model" class="field">
+                <span>Audio2Face character</span>
+                <select id="assistant-audio2face-model" name="nvidiaModel">
+                  <option value="mark_v2.3">Mark v2.3</option>
+                  <option value="claire_v2.3">Claire v2.3</option>
+                  <option value="james_v2.3">James v2.3</option>
+                </select>
+              </label>
+              <label for="assistant-model" class="field">
+                <span>Realtime model</span>
+                <select id="assistant-model" name="model">
+                  <option value="gpt-4o-mini-realtime-preview">gpt-4o-mini-realtime-preview</option>
+                    <option value="gpt-4o-realtime-preview">gpt-4o-realtime-preview</option>
+                    <option value="gpt-4o-mini-realtime-preview-2024-12-17">gpt-4o-mini-realtime-preview-2024-12-17</option>
+                  </select>
+                </label>
+                <label for="assistant-voice" class="field">
+                  <span>Default voice</span>
+                  <select id="assistant-voice" name="voice">
+                    <option value="alloy">Alloy</option>
+                    <option value="ash" selected>Ash</option>
+                    <option value="ballad">Ballad</option>
+                    <option value="coral">Coral</option>
+                    <option value="echo">Echo</option>
+                    <option value="fable">Fable</option>
+                    <option value="onyx">Onyx</option>
+                    <option value="nova">Nova</option>
+                    <option value="sage">Sage</option>
+                    <option value="shimmer">Shimmer</option>
+                    <option value="verse">Verse</option>
+                  </select>
+                </label>
+                <label for="assistant-initial-prompt" class="field">
+                  <span>Initial prompt</span>
+                  <textarea
+                    id="assistant-initial-prompt"
+                    name="initialPrompt"
+                    rows="4"
+                    placeholder="You are a helpful magic mirror on the wall that talks like a gameshow host."
+                  ></textarea>
+                  <small>Define the realtime persona. Use {{name}} and {{hotword}} to reference the current name and wake phrase.</small>
+                </label>
+              </div>
+            </article>
+            <article class="settings-card animation-card">
+              <h2>Character animation</h2>
+              <section class="card-section">
+                <h3>Head settings</h3>
+                <p class="section-summary small">
+                  Keep Mirror alive while idle. Random nods and a gentle hover react to speech volume for extra presence.
+                </p>
+                <label for="enable-smoke-animation" class="toggle-field">
+                  <div class="toggle-text">
+                    <span>Enable smoke reveal animation</span>
+                    <small>Play a swirling smoke effect before Mirror appears when you say the hotword.</small>
+                  </div>
+                  <input type="checkbox" id="enable-smoke-animation" name="enableSmokeAnimation" />
+                </label>
+                <label for="head-enable-blinks" class="toggle-field">
+                  <div class="toggle-text">
+                    <span>Enable blinks</span>
+                    <small>Natural eyelid motion is active by default.</small>
+                  </div>
+                  <input type="checkbox" id="head-enable-blinks" name="headEnableBlinks" />
+                </label>
+                <label for="head-enable-nods" class="toggle-field">
+                  <div class="toggle-text">
+                    <span>Enable random head nods</span>
+                    <small>Let the head subtly nod from side to side while listening.</small>
+                  </div>
+                  <input type="checkbox" id="head-enable-nods" name="headEnableNods" />
+                </label>
+                <label for="head-nod-intensity" class="field slider-field">
+                  <div class="field-header">
+                    <span>Nod intensity</span>
+                    <span class="range-value" data-display-for="head-nod-intensity"></span>
+                  </div>
+                  <input id="head-nod-intensity" name="headNodIntensity" type="range" min="0" max="1" step="0.05" />
+                  <small>Adjust the base amount of movement during a nod.</small>
+                </label>
+                <label for="head-volume-influence" class="field slider-field">
+                  <div class="field-header">
+                    <span>Volume influence</span>
+                    <span class="range-value" data-display-for="head-volume-influence"></span>
+                  </div>
+                  <input id="head-volume-influence" name="headVolumeInfluence" type="range" min="0" max="1" step="0.05" />
+                  <small>Higher values tie nod depth more directly to the assistant’s speaking volume.</small>
+                </label>
+                <label for="head-hover-amount" class="field slider-field">
+                  <div class="field-header">
+                    <span>Hover amount</span>
+                    <span class="range-value" data-display-for="head-hover-amount"></span>
+                  </div>
+                  <input id="head-hover-amount" name="headHoverAmount" type="range" min="0" max="1" step="0.05" />
+                  <small>Controls how much the head floats in place between nods.</small>
+                </label>
+              </section>
+              <section class="card-section">
+                <h3>Expression settings</h3>
+                <p class="section-summary small">
+                  Drive brows and smiles directly from the audio stream for an expressive, friendly mirror persona.
+                </p>
+                <label for="expressions-enable-eyebrows" class="toggle-field">
+                  <div class="toggle-text">
+                    <span>Enable eyebrow reactions</span>
+                    <small>Brows rise and fall in sync with the assistant’s volume.</small>
+                  </div>
+                  <input type="checkbox" id="expressions-enable-eyebrows" name="expressionsEnableEyebrows" />
+                </label>
+                <label for="expressions-eyebrow-intensity" class="field slider-field">
+                  <div class="field-header">
+                    <span>Eyebrow amount</span>
+                    <span class="range-value" data-display-for="expressions-eyebrow-intensity"></span>
+                  </div>
+                  <input
+                    id="expressions-eyebrow-intensity"
+                    name="expressionsEyebrowIntensity"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                  />
+                  <small>Sets the maximum eyebrow lift while reacting to speech.</small>
+                </label>
+                <label for="expressions-eyebrow-volume" class="field slider-field">
+                  <div class="field-header">
+                    <span>Eyebrow volume sensitivity</span>
+                    <span class="range-value" data-display-for="expressions-eyebrow-volume"></span>
+                  </div>
+                  <input
+                    id="expressions-eyebrow-volume"
+                    name="expressionsEyebrowVolume"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                  />
+                  <small>Higher values raise brows more as the assistant grows louder.</small>
+                </label>
+                <label for="expressions-happiness" class="field slider-field">
+                  <div class="field-header">
+                    <span>Happiness boost</span>
+                    <span class="range-value" data-display-for="expressions-happiness"></span>
+                  </div>
+                  <input id="expressions-happiness" name="expressionsHappiness" type="range" min="0" max="1" step="0.05" />
+                  <small>Blend in a friendly smile that can rise with the voice.</small>
+                </label>
+              </section>
+              <section class="card-section">
+                <h3>Lighting</h3>
+                <p class="section-summary small">
+                  Control Mirror’s key light and skin tint to match the environment and highlight facial animation.
+                </p>
+                <div class="lighting-preview" id="lighting-preview" aria-live="polite">
+                  <div class="lighting-preview-status" id="lighting-preview-status">
+                    Loading lighting preview…
+                  </div>
+                </div>
+                <label for="lighting-mesh-color" class="field color-field">
+                  <span>Head mesh colour</span>
+                  <input id="lighting-mesh-color" name="lightingMeshColor" type="color" />
+                  <small>Choose the base albedo tint applied to the head mesh material.</small>
+                </label>
+                <label for="lighting-enable-spot" class="toggle-field">
+                  <div class="toggle-text">
+                    <span>Enable spotlight</span>
+                    <small>Turn on the key light to sculpt Mirror’s face directly from the controls below.</small>
+                  </div>
+                  <input type="checkbox" id="lighting-enable-spot" name="lightingEnableSpotLight" />
+                </label>
+                <label for="lighting-spot-intensity" class="field slider-field">
+                  <div class="field-header">
+                    <span>Spotlight intensity</span>
+                    <span class="range-value" data-display-for="lighting-spot-intensity"></span>
+                  </div>
+                  <input
+                    id="lighting-spot-intensity"
+                    name="lightingSpotIntensity"
+                    type="range"
+                    min="4"
+                    max="400"
+                    step="0.05"
+                  />
+                  <small>Adjust how bright the spotlight appears relative to the other lights.</small>
+                </label>
+                <label for="lighting-spot-angle" class="field slider-field">
+                  <div class="field-header">
+                    <span>Beam angle</span>
+                    <span class="range-value" data-display-for="lighting-spot-angle"></span>
+                  </div>
+                  <input
+                    id="lighting-spot-angle"
+                    name="lightingSpotAngle"
+                    type="range"
+                    min="10"
+                    max="80"
+                    step="1"
+                  />
+                  <small>Widen or tighten the spotlight cone to sculpt the highlights across the face.</small>
+                </label>
+                <label for="lighting-spot-offset" class="field slider-field">
+                  <div class="field-header">
+                    <span>Offset distance</span>
+                    <span class="range-value" data-display-for="lighting-spot-offset"></span>
+                  </div>
+                  <input
+                    id="lighting-spot-offset"
+                    name="lightingSpotOffset"
+                    type="range"
+                    min="0.4"
+                    max="4"
+                    step="0.05"
+                  />
+                  <small>Move the light closer to or farther from the face while keeping it trained on the target.</small>
+                </label>
+                <label for="lighting-spot-height" class="field slider-field">
+                  <div class="field-header">
+                    <span>Height offset</span>
+                    <span class="range-value" data-display-for="lighting-spot-height"></span>
+                  </div>
+                  <input
+                    id="lighting-spot-height"
+                    name="lightingSpotHeightOffset"
+                    type="range"
+                    min="-2"
+                    max="2"
+                    step="0.05"
+                  />
+                  <small>Raise or lower the spotlight relative to the face; negative values sit below the chin.</small>
+                </label>
+                <label for="lighting-spot-vertical" class="field slider-field">
+                  <div class="field-header">
+                    <span>Vertical rotation</span>
+                    <span class="range-value" data-display-for="lighting-spot-vertical"></span>
+                  </div>
+                  <input
+                    id="lighting-spot-vertical"
+                    name="lightingSpotVerticalRotation"
+                    type="range"
+                    min="-90"
+                    max="90"
+                    step="1"
+                  />
+                  <small>Orbit the spotlight above or below the face while keeping it locked on the head.</small>
+                </label>
+              </section>
+            </article>
+          </div>
+        </section>
+      </form>
+      <div class="form-actions">
+        <button type="button" id="save-button" class="primary" disabled>Save settings</button>
+        <button type="button" id="reset-button" class="secondary">Reset to defaults</button>
+      </div>
+    </main>
+    <footer class="page-footer">
+      <p>The API key and preferences stay on this device. Update them anytime from this page.</p>
+    </footer>
+    <script type="module" src="/settings.js"></script>
+  </body>
+</html>

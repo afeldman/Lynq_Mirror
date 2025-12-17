@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NVIDIA Audio2Face Diagnostic</title>
+    <link rel="stylesheet" href="/nvidia.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.168.0/build/three.module.js",
+          "three/examples/jsm/": "https://unpkg.com/three@0.168.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="header-inner">
+        <div class="header-titles">
+          <h1>NVIDIA Audio2Face Diagnostic</h1>
+          <p>Upload a WAV file and verify that Audio2Face blendshapes reach Mirror.</p>
+        </div>
+        <nav>
+          <a href="/">Home</a>
+          <a href="/face">Face</a>
+          <a href="/settings">Settings</a>
+          <a href="/nvidia" aria-current="page">NVIDIA</a>
+          <a href="/debug">Debug</a>
+        </nav>
+      </div>
+    </header>
+    <main class="page-main">
+      <section class="intro">
+        <h2>How this test works</h2>
+        <p>
+          Select a spoken WAV clip, then send it through NVIDIA's Audio2Face service using the API key stored in
+          <strong>Settings</strong>. The activity log shows each step, while the summary explains which model, function and
+          sample rates were used. Mirror renders the returned blendshape frames so you can confirm the head responds.
+        </p>
+      </section>
+      <div class="layout">
+        <section class="panel control-panel" aria-labelledby="upload-title">
+          <div class="panel-header">
+            <h2 id="upload-title">Audio upload &amp; request</h2>
+            <p>WAV on the left, Mirror on the right.</p>
+          </div>
+          <form id="a2f-form" class="form-grid">
+            <label class="field file-field">
+              <span>WAV file</span>
+              <input id="file-input" type="file" accept="audio/wav,.wav" required />
+              <small id="file-hint">16 kHz mono recommended. We'll resample automatically if needed.</small>
+            </label>
+            <div id="file-info" class="file-info" hidden></div>
+            <div class="field">
+              <span>Audio2Face API key</span>
+              <div id="api-key-status" class="status-pill">Loading…</div>
+              <small>Set the key in <a href="/settings">Settings</a>. Stored in this browser only.</small>
+            </div>
+            <label class="field">
+              <span>Function ID</span>
+              <input id="function-id-input" type="text" autocomplete="off" spellcheck="false" placeholder="Function ID" />
+            </label>
+            <label class="field">
+              <span>Character</span>
+              <select id="model-select">
+                <option value="mark_v2.3">Mark v2.3</option>
+                <option value="claire_v2.3">Claire v2.3</option>
+                <option value="james_v2.3">James v2.3</option>
+              </select>
+            </label>
+            <div class="form-actions">
+              <button id="process-button" type="submit">Send to NVIDIA</button>
+              <button id="clear-log-button" type="button" class="ghost">Clear log</button>
+            </div>
+          </form>
+          <section class="panel-section">
+            <h3>Request summary</h3>
+            <div id="result-summary" class="result-summary">
+              <p class="placeholder">Run a test to see model, rates and blendshape counts.</p>
+            </div>
+            <div id="defaults-info" class="defaults-info" hidden></div>
+          </section>
+          <section class="panel-section tuning-section">
+            <h3>Playback tuning</h3>
+            <p class="tuning-hint">
+              Use these sliders to experiment with how the returned frames line up with the uploaded audio.
+              Adjust them before pressing play to help diagnose timing issues.
+            </p>
+            <div class="tuning-grid">
+              <div class="slider-field">
+                <div class="slider-topline">
+                  <span>Animation offset</span>
+                  <span id="animation-offset-value" class="slider-value">0 ms</span>
+                </div>
+                <input
+                  id="animation-offset-slider"
+                  type="range"
+                  min="-1000"
+                  max="1000"
+                  step="10"
+                  value="0"
+                />
+                <small>Positive values delay the blendshapes relative to the audio clock.</small>
+              </div>
+              <div class="slider-field">
+                <div class="slider-topline">
+                  <span>Timeline scale</span>
+                  <span id="timeline-scale-value" class="slider-value">100%</span>
+                </div>
+                <input
+                  id="timeline-scale-slider"
+                  type="range"
+                  min="0.25"
+                  max="2"
+                  step="0.01"
+                  value="1"
+                />
+                <small>Stretch or compress frame timecodes to match the audio duration.</small>
+              </div>
+              <div class="slider-field">
+                <div class="slider-topline">
+                  <span>Playback rate</span>
+                  <span id="playback-rate-value" class="slider-value">1.00×</span>
+                </div>
+                <input
+                  id="playback-rate-slider"
+                  type="range"
+                  min="0.75"
+                  max="1.25"
+                  step="0.01"
+                  value="1"
+                />
+                <small>Changes both audio playback speed and frame advancement rate.</small>
+              </div>
+              <div class="slider-field">
+                <div class="slider-topline">
+                  <span>Smoothing window</span>
+                  <span id="smoothing-window-value" class="slider-value">Off</span>
+                </div>
+                <input
+                  id="smoothing-window-slider"
+                  type="range"
+                  min="0"
+                  max="12"
+                  step="1"
+                  value="0"
+                />
+                <small>Average this many previous frames with the current one before applying.</small>
+              </div>
+              <div class="slider-field">
+                <div class="slider-topline">
+                  <span>Smoothing blend</span>
+                  <span id="smoothing-strength-value" class="slider-value">0%</span>
+                </div>
+                <input
+                  id="smoothing-strength-slider"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value="0"
+                />
+                <small>Blend between the raw weights and the averaged values.</small>
+              </div>
+            </div>
+          </section>
+          <section class="panel-section">
+            <div class="log-header">
+              <h3>Activity log</h3>
+              <span id="log-count" class="log-count" hidden></span>
+            </div>
+            <div id="log-output" class="log-output" aria-live="polite">
+              <p class="placeholder">Logs appear here during processing.</p>
+            </div>
+          </section>
+        </section>
+        <section class="panel viewer-panel" aria-labelledby="viewer-title">
+          <div class="panel-header">
+            <h2 id="viewer-title">Mirror playback</h2>
+            <p>Inspect the returned frames and current blendshape weights.</p>
+          </div>
+          <div class="viewer-canvas" id="viewer-canvas">
+            <div id="viewer-status" class="viewer-status">Loading Mirror…</div>
+          </div>
+          <div class="player-controls">
+            <div class="button-row">
+              <button id="play-button" type="button">Play</button>
+              <button id="pause-button" type="button" class="ghost">Pause</button>
+              <button id="reset-button" type="button" class="ghost">Reset</button>
+            </div>
+            <audio id="playback-audio" class="audio-debug-player" controls preload="auto" hidden></audio>
+            <label class="slider-field">
+              <span id="frame-info">Frame 0 / 0</span>
+              <input id="frame-slider" type="range" min="0" max="0" step="1" value="0" disabled />
+            </label>
+          </div>
+          <section class="panel-section">
+            <h3>Current blendshapes</h3>
+            <table class="blendshape-table">
+              <thead>
+                <tr>
+                  <th scope="col">Blendshape</th>
+                  <th scope="col">Weight</th>
+                </tr>
+              </thead>
+              <tbody id="blendshape-table-body">
+                <tr class="placeholder-row">
+                  <td colspan="2">No frames yet. Run a clip to inspect weights.</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+        </section>
+      </div>
+    </main>
+    <script type="module" src="/nvidia.js"></script>
+  </body>
+</html>

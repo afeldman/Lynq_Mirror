@@ -1,0 +1,11 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-net --allow-read --allow-env src/server.ts",
+    "start": "deno run --allow-net --allow-read --allow-env src/server.ts",
+    "check": "deno check src/server.ts src/nvidia/index.ts",
+    "fmt": "deno fmt src/",
+    "lint": "deno lint src/"
+  },
+  "imports": {},
+  "nodeModulesDir": "auto"
+}

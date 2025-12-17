@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mirror — Debug Monitor</title>
+    <link rel="stylesheet" href="/face.css" />
+    <link rel="stylesheet" href="/debug.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.168.0/build/three.module.js",
+          "three/examples/jsm/": "https://unpkg.com/three@0.168.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body class="debug-page" data-face-debug="true">
+    <header id="face-header">
+      <nav>
+        <a href="/">Home</a>
+        <a href="/face">Face</a>
+        <a href="/settings">Settings</a>
+        <a href="/nvidia">NVIDIA</a>
+        <a href="/debug" aria-current="page">Debug</a>
+      </nav>
+    </header>
+    <div id="status">Loading Mirror…</div>
+    <div id="debug-layout">
+      <div id="canvas-container" class="debug-canvas"></div>
+      <aside id="debug-log-panel" aria-label="Debug log">
+        <div class="debug-log-header">
+          <h1>Debug log</h1>
+          <div class="debug-log-actions">
+            <span id="debug-log-count" class="debug-log-count">0 entries</span>
+            <button id="debug-log-download" type="button">Download logs</button>
+            <button id="debug-log-clear" type="button">Clear</button>
+          </div>
+        </div>
+        <div id="debug-log-output" class="debug-log-output" aria-live="polite"></div>
+      </aside>
+    </div>
+    <audio id="assistant-audio" autoplay playsinline muted></audio>
+    <script type="module" src="/debug.js"></script>
+  </body>
+</html>

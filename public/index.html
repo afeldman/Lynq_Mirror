@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FBX Blendshape Tester</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="/" aria-current="page">Home</a>
+        <a href="/face">Face</a>
+        <a href="/settings">Settings</a>
+        <a href="/nvidia">NVIDIA</a>
+        <a href="/debug">Debug</a>
+      </nav>
+      <h1>FBX Blendshape Tester</h1>
+      <p>Drop an FBX head model or choose one of the default assets to inspect and tweak blendshapes.</p>
+    </header>
+    <main>
+      <section class="controls">
+        <div class="drop-zone" id="drop-zone">
+          <p>Drag &amp; drop an FBX file here or</p>
+          <label class="file-input">
+            <input type="file" id="file-input" accept=".fbx" />
+            <span>Select a file</span>
+          </label>
+        </div>
+        <div class="default-selector">
+          <label for="default-select">Or load a default character:</label>
+          <select id="default-select">
+            <option value="">-- Loading available assets... --</option>
+          </select>
+          <button id="load-default" type="button">Load selected</button>
+        </div>
+        <div class="status" id="status-message">Ready.</div>
+      </section>
+      <section class="viewer">
+        <div id="canvas-container"></div>
+        <aside id="blendshape-controls">
+          <div class="tab-controls" id="blendshape-tablist" role="tablist" aria-label="Blendshape groups"></div>
+          <section class="control-panel" id="manual-blendshape-panel" aria-labelledby="blendshape-tablist">
+            <h2>Blendshapes</h2>
+            <p class="panel-description">
+              Adjust individual morph targets manually. Percentages reflect the final values after viseme
+              contributions are applied.
+            </p>
+            <div class="sliders" id="blendshape-sliders">
+              <p class="placeholder">Load a model to see available blendshapes.</p>
+            </div>
+          </section>
+          <section class="control-panel is-hidden" id="viseme-panel" aria-labelledby="blendshape-tablist">
+            <h2>Visemes</h2>
+            <p class="panel-description" id="viseme-description">
+              Dial in viseme weights to drive common lip-sync blendshape recipes.
+            </p>
+            <div class="sliders" id="viseme-sliders">
+              <p class="placeholder">Load a model to map visemes to blendshapes.</p>
+            </div>
+          </section>
+        </aside>
+      </section>
+    </main>
+    <footer>
+      <p>Running on port 1234 – Three.js FBX testing playground.</p>
+    </footer>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.168.0/build/three.module.js",
+          "three/examples/jsm/": "https://unpkg.com/three@0.168.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
