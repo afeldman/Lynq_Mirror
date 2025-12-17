@@ -6,6 +6,10 @@
     "fmt": "deno fmt src/",
     "lint": "deno lint src/"
   },
-  "imports": {},
+  "imports": {
+    "oak": "https://deno.land/x/oak@v14.0.0/mod.ts",
+    "std/yaml": "https://deno.land/std@0.208.0/yaml/mod.ts",
+    "std/path": "https://deno.land/std@0.208.0/path/mod.ts"
+  },
   "nodeModulesDir": "auto"
 }

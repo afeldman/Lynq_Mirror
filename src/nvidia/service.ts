@@ -4,14 +4,14 @@
  */
 
 import {
+  getBlendshapeParams,
   loadModelConfig,
   parseEmotionWithTimecode,
-  getBlendshapeParams,
 } from "./config-loader.ts";
 import {
+  DEFAULT_MODEL,
   getDefaultFunctionIdForModel,
   isValidModel,
-  DEFAULT_MODEL,
 } from "./models.ts";
 import { decodeBase64Audio, getAudioStats } from "./audio-processor.ts";
 
@@ -39,13 +39,13 @@ export interface A2FProcessResponse {
 export async function processAudioWithA2F(
   audioData: string,
   model: string = DEFAULT_MODEL,
-  functionId?: string
+  functionId?: string,
 ): Promise<A2FProcessResponse> {
   try {
     // Validate model
     if (!isValidModel(model)) {
       throw new Error(
-        `Invalid model: ${model}. Supported models: mark_v2_3, claire_v2_3, james_v2_3`
+        `Invalid model: ${model}. Supported models: mark_v2_3, claire_v2_3, james_v2_3`,
       );
     }
 
@@ -66,9 +66,9 @@ export async function processAudioWithA2F(
     // Log processing info
     console.log(`[Audio2Face] Processing with model: ${model}`);
     console.log(
-      `[Audio2Face] Audio duration: ${audioStats.duration.toFixed(2)}s (${
-        audioStats.byteSize
-      } bytes)`
+      `[Audio2Face] Audio duration: ${
+        audioStats.duration.toFixed(2)
+      }s (${audioStats.byteSize} bytes)`,
     );
     console.log(`[Audio2Face] Function ID: ${fnId}`);
     console.log(`[Audio2Face] Emotions detected: ${emotions.length}`);

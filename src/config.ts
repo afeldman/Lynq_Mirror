@@ -104,8 +104,8 @@ export function printConfig(): void {
   for (const key of secretKeys) {
     const value = Deno.env.get(key);
     if (value) {
-      const masked =
-        value.substring(0, 6) + "*".repeat(Math.max(0, value.length - 10));
+      const masked = value.substring(0, 6) +
+        "*".repeat(Math.max(0, value.length - 10));
       console.log(`  ${key}: ${masked}`);
     }
   }

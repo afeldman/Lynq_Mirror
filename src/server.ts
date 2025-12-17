@@ -1,16 +1,12 @@
+import { Application, Router, send } from "oak";
+import { join } from "std/path";
 import {
-  Application,
-  Router,
-  send,
-} from "https://deno.land/x/oak@v14.0.0/mod.ts";
-import { join } from "https://deno.land/std@0.208.0/path/mod.ts";
-import {
-  processAudioWithA2F,
   listSupportedModels,
+  processAudioWithA2F,
   validateAudioData,
 } from "./nvidia/index.ts";
 import { conversationPipeline, type OpenAIConfig } from "./openai.ts";
-import { loadEnv, getConfig, printConfig } from "./config.ts";
+import { getConfig, loadEnv, printConfig } from "./config.ts";
 
 // Load environment variables from .env
 await loadEnv();
@@ -33,7 +29,8 @@ app.use(async (ctx, next) => {
     ctx.request.headers.get("content-type")?.includes("application/json")
   ) {
     try {
-      ctx.request.body = await ctx.request.body({ type: "json" }).value;
+      const bodyReader = await ctx.request.body.json();
+      (ctx.request as unknown as Record<string, unknown>).body = bodyReader;
     } catch {
       ctx.response.status = 400;
       ctx.response.body = { error: "Invalid JSON" };
@@ -112,9 +109,11 @@ router.get("/api/characters", async (ctx) => {
       for await (const entry of Deno.readDir(charactersDir)) {
         if (entry.isDirectory) {
           try {
-            for await (const file of Deno.readDir(
-              join(charactersDir, entry.name)
-            )) {
+            for await (
+              const file of Deno.readDir(
+                join(charactersDir, entry.name),
+              )
+            ) {
               if (file.isFile && file.name.toLowerCase().endsWith(".fbx")) {
                 characters.push({
                   name: `${entry.name} / ${file.name}`,
@@ -145,7 +144,7 @@ router.get("/api/characters", async (ctx) => {
 });
 
 // List supported models
-router.get("/api/models", async (ctx) => {
+router.get("/api/models", (ctx) => {
   try {
     const models = listSupportedModels();
     ctx.response.body = models;
@@ -159,11 +158,12 @@ router.get("/api/models", async (ctx) => {
 // Process audio with Audio2Face
 router.post("/api/process-audio", async (ctx) => {
   try {
-    const body = ctx.request.body as {
-      audio: string;
-      model?: string;
-      functionId?: string;
-    };
+    const body = (ctx.request as unknown as Record<string, unknown>)
+      .body as unknown as {
+        audio: string;
+        model?: string;
+        functionId?: string;
+      };
 
     if (!body.audio) {
       ctx.response.status = 400;
@@ -182,7 +182,7 @@ router.post("/api/process-audio", async (ctx) => {
     const result = await processAudioWithA2F(
       body.audio,
       body.model || "mark_v2_3",
-      body.functionId
+      body.functionId,
     );
 
     ctx.response.body = result;
@@ -198,11 +198,12 @@ router.post("/api/process-audio", async (ctx) => {
 // Voice conversation with character
 router.post("/api/conversation", async (ctx) => {
   try {
-    const body = ctx.request.body as {
-      audio: string;
-      systemPrompt?: string;
-      character?: string;
-    };
+    const body = (ctx.request as unknown as Record<string, unknown>)
+      .body as unknown as {
+        audio: string;
+        systemPrompt?: string;
+        character?: string;
+      };
 
     if (!body.audio) {
       ctx.response.status = 400;
@@ -225,8 +226,7 @@ router.post("/api/conversation", async (ctx) => {
       return;
     }
 
-    const systemPrompt =
-      body.systemPrompt ||
+    const systemPrompt = body.systemPrompt ||
       `You are a helpful and friendly character. Keep responses concise (1-2 sentences). 
       The user is speaking to you via voice, so be warm and conversational.`;
 
@@ -239,13 +239,13 @@ router.post("/api/conversation", async (ctx) => {
     const result = await conversationPipeline(
       body.audio,
       systemPrompt,
-      openaiConfig
+      openaiConfig,
     );
 
     // Optionally process with Audio2Face for animation
     const a2fResult = await processAudioWithA2F(
       result.audioBase64,
-      body.character || "mark_v2_3"
+      body.character || "mark_v2_3",
     );
 
     ctx.response.body = {
@@ -280,7 +280,7 @@ console.log(
     getConfig("OPENAI_API_KEY")
       ? "✅ enabled"
       : "❌ disabled (set OPENAI_API_KEY in .env)"
-  }`
+  }`,
 );
 printConfig();
 

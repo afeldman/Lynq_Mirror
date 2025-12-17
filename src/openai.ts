@@ -66,10 +66,9 @@ function getApiBaseUrl(config: OpenAIConfig): string {
  */
 export async function transcribeAudio(
   audioBase64: string,
-  config: OpenAIConfig
+  config: OpenAIConfig,
 ): Promise<TranscriptionResult> {
-  const apiKey =
-    config.apiKey ||
+  const apiKey = config.apiKey ||
     Deno.env.get("MAMMOUTH_API_KEY") ||
     Deno.env.get("OPENAI_API_KEY");
   if (!apiKey) {
@@ -79,7 +78,7 @@ export async function transcribeAudio(
   // Whisper is only available on OpenAI, not Mammouth
   if (config.provider !== "openai") {
     throw new Error(
-      "Whisper STT is only available with OpenAI. Please set provider: 'openai'"
+      "Whisper STT is only available with OpenAI. Please set provider: 'openai'",
     );
   }
 
@@ -90,7 +89,7 @@ export async function transcribeAudio(
   formData.append(
     "file",
     new Blob([audioBuffer], { type: "audio/wav" }),
-    "audio.wav"
+    "audio.wav",
   );
   formData.append("model", "whisper-1");
 
@@ -103,7 +102,7 @@ export async function transcribeAudio(
           Authorization: `Bearer ${apiKey}`,
         },
         body: formData,
-      }
+      },
     );
 
     if (!response.ok) {
@@ -119,7 +118,7 @@ export async function transcribeAudio(
     throw new Error(
       `Failed to transcribe audio: ${
         err instanceof Error ? err.message : "Unknown error"
-      }`
+      }`,
     );
   }
 }
@@ -130,10 +129,9 @@ export async function transcribeAudio(
 export async function generateChatResponse(
   userMessage: string,
   systemPrompt: string,
-  config: OpenAIConfig
+  config: OpenAIConfig,
 ): Promise<ChatResponse> {
-  const apiKey =
-    config.apiKey ||
+  const apiKey = config.apiKey ||
     Deno.env.get("MAMMOUTH_API_KEY") ||
     Deno.env.get("OPENAI_API_KEY");
   if (!apiKey) {
@@ -190,7 +188,7 @@ export async function generateChatResponse(
     throw new Error(
       `Failed to generate chat response: ${
         err instanceof Error ? err.message : "Unknown error"
-      }`
+      }`,
     );
   }
 }
@@ -200,7 +198,7 @@ export async function generateChatResponse(
  */
 export async function generateSpeech(
   text: string,
-  config: OpenAIConfig
+  config: OpenAIConfig,
 ): Promise<TTSResult> {
   const apiKey = config.apiKey || Deno.env.get("OPENAI_API_KEY");
   if (!apiKey) {
@@ -210,7 +208,7 @@ export async function generateSpeech(
   // TTS is only available on OpenAI
   if (config.provider !== "openai") {
     throw new Error(
-      "TTS is only available with OpenAI. Please set provider: 'openai'"
+      "TTS is only available with OpenAI. Please set provider: 'openai'",
     );
   }
 
@@ -247,7 +245,7 @@ export async function generateSpeech(
     throw new Error(
       `Failed to generate speech: ${
         err instanceof Error ? err.message : "Unknown error"
-      }`
+      }`,
     );
   }
 }
@@ -258,7 +256,7 @@ export async function generateSpeech(
 export async function conversationPipeline(
   audioBase64: string,
   systemPrompt: string,
-  config: OpenAIConfig
+  config: OpenAIConfig,
 ): Promise<{
   userMessage: string;
   assistantMessage: string;
@@ -277,7 +275,7 @@ export async function conversationPipeline(
   const chatResponse = await generateChatResponse(
     transcription.text,
     systemPrompt,
-    config
+    config,
   );
   console.log(`[OpenAI] Assistant: "${chatResponse.text}"`);
 

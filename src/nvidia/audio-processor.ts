@@ -4,8 +4,8 @@
  */
 
 import {
-  PCM16_TARGET_SAMPLE_RATE,
   PCM16_BYTES_PER_SAMPLE,
+  PCM16_TARGET_SAMPLE_RATE,
 } from "./constants.ts";
 
 /**
@@ -14,7 +14,7 @@ import {
  */
 export function normalizeAudioToPCM16(
   audioData: Float32Array,
-  originalSampleRate: number
+  originalSampleRate: number,
 ): Uint8Array {
   // Resample if needed
   let pcm16Data = audioData;
@@ -30,8 +30,7 @@ export function normalizeAudioToPCM16(
       const srcIndexFrac = srcIndex - srcIndexInt;
 
       if (srcIndexInt + 1 < audioData.length) {
-        pcm16Data[i] =
-          audioData[srcIndexInt] * (1 - srcIndexFrac) +
+        pcm16Data[i] = audioData[srcIndexInt] * (1 - srcIndexFrac) +
           audioData[srcIndexInt + 1] * srcIndexFrac;
       } else {
         pcm16Data[i] = audioData[srcIndexInt];
@@ -44,8 +43,9 @@ export function normalizeAudioToPCM16(
   const view = new Int16Array(buffer);
 
   for (let i = 0; i < pcm16Data.length; i++) {
-    let sample =
-      pcm16Data[i] < 0 ? pcm16Data[i] * 0x8000 : pcm16Data[i] * 0x7fff;
+    let sample = pcm16Data[i] < 0
+      ? pcm16Data[i] * 0x8000
+      : pcm16Data[i] * 0x7fff;
     sample = Math.max(-32768, Math.min(32767, sample));
     view[i] = sample;
   }
@@ -60,7 +60,7 @@ export function decodeBase64Audio(base64Data: string): Uint8Array {
   return new Uint8Array(
     atob(base64Data)
       .split("")
-      .map((c) => c.charCodeAt(0))
+      .map((c) => c.charCodeAt(0)),
   );
 }
 
@@ -80,7 +80,7 @@ export function encodeBase64Audio(audioData: Uint8Array): string {
  */
 export function getAudioDuration(
   audioData: Uint8Array,
-  sampleRate: number = PCM16_TARGET_SAMPLE_RATE
+  sampleRate: number = PCM16_TARGET_SAMPLE_RATE,
 ): number {
   const samples = audioData.length / PCM16_BYTES_PER_SAMPLE;
   return samples / sampleRate;

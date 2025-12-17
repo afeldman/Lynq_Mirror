@@ -3,8 +3,8 @@
  * Load and cache YAML model configurations
  */
 
-import { parse } from "https://deno.land/std@0.208.0/yaml/mod.ts";
-import { join, dirname } from "https://deno.land/std@0.208.0/path/mod.ts";
+import { parse } from "std/yaml";
+import { dirname, join } from "std/path";
 import { MODEL_CONFIGS } from "./models.ts";
 
 const __dirname = dirname(new URL(".", import.meta.url).pathname);
@@ -17,7 +17,7 @@ const configCache = new Map<string, Record<string, unknown>>();
  * Load YAML configuration for a model
  */
 export async function loadModelConfig(
-  modelName: string
+  modelName: string,
 ): Promise<Record<string, unknown>> {
   if (configCache.has(modelName)) {
     return configCache.get(modelName)!;
@@ -39,7 +39,7 @@ export async function loadModelConfig(
     throw new Error(
       `Failed to load config for model ${modelName}: ${
         err instanceof Error ? err.message : "Unknown error"
-      }`
+      }`,
     );
   }
 }
@@ -55,7 +55,7 @@ export function clearConfigCache(): void {
  * Get cached model configuration (synchronous)
  */
 export function getCachedConfig(
-  modelName: string
+  modelName: string,
 ): Record<string, unknown> | null {
   return configCache.get(modelName) ?? null;
 }
@@ -69,7 +69,7 @@ export interface EmotionFrame {
 }
 
 export function parseEmotionWithTimecode(
-  config: Record<string, unknown>
+  config: Record<string, unknown>,
 ): EmotionFrame[] {
   const emotionList: EmotionFrame[] = [];
 
@@ -100,7 +100,7 @@ export interface BlendshapeParams {
 }
 
 export function getBlendshapeParams(
-  config: Record<string, unknown>
+  config: Record<string, unknown>,
 ): BlendshapeParams {
   const blendshapeConfig = config.blendshape_parameters as Record<
     string,
@@ -108,8 +108,8 @@ export function getBlendshapeParams(
   >;
 
   return {
-    multipliers:
-      (blendshapeConfig?.multipliers as Record<string, number>) ?? {},
+    multipliers: (blendshapeConfig?.multipliers as Record<string, number>) ??
+      {},
     offsets: (blendshapeConfig?.offsets as Record<string, number>) ?? {},
     enable_clamping_bs_weight:
       (blendshapeConfig?.enable_clamping_bs_weight as boolean) ?? false,

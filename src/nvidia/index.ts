@@ -8,37 +8,37 @@ export * from "./constants.ts";
 
 // Models
 export {
-  MODEL_CONFIGS,
   DEFAULT_MODEL,
   getDefaultFunctionIdForModel,
-  listSupportedModels,
   isValidModel,
+  listSupportedModels,
+  MODEL_CONFIGS,
   type ModelConfig,
 } from "./models.ts";
 
 // Audio Processing
 export {
-  normalizeAudioToPCM16,
   decodeBase64Audio,
   encodeBase64Audio,
   getAudioDuration,
   getAudioStats,
+  normalizeAudioToPCM16,
 } from "./audio-processor.ts";
 
 // Configuration
 export {
-  loadModelConfig,
-  clearConfigCache,
-  getCachedConfig,
-  parseEmotionWithTimecode,
-  getBlendshapeParams,
-  type EmotionFrame,
   type BlendshapeParams,
+  clearConfigCache,
+  type EmotionFrame,
+  getBlendshapeParams,
+  getCachedConfig,
+  loadModelConfig,
+  parseEmotionWithTimecode,
 } from "./config-loader.ts";
 
 // Service
 export {
+  type A2FProcessResponse,
   processAudioWithA2F,
   validateAudioData,
-  type A2FProcessResponse,
 } from "./service.ts";

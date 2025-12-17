@@ -19,7 +19,7 @@ export interface BlendshapeWeight {
  */
 export function applyBlendshapeConfig(
   rawWeights: Record<string, number>,
-  config: BlendshapeConfig
+  config: BlendshapeConfig,
 ): BlendshapeWeight[] {
   const results: BlendshapeWeight[] = [];
 
@@ -27,7 +27,7 @@ export function applyBlendshapeConfig(
     const multiplier = config.multipliers?.[name] ?? 1.0;
     const offset = config.offsets?.[name] ?? 0.0;
 
-    let value = rawValue * multiplier + offset;
+    const value = rawValue * multiplier + offset;
 
     // Clamp if enabled
     let clamped = value;
@@ -51,7 +51,7 @@ export function applyBlendshapeConfig(
 export function smoothBlendshapes(
   current: Record<string, number>,
   target: Record<string, number>,
-  smoothing: number
+  smoothing: number,
 ): Record<string, number> {
   const result: Record<string, number> = {};
 
@@ -68,7 +68,7 @@ export function smoothBlendshapes(
  * Normalize blendshape values to 0-1 range
  */
 export function normalizeBlendshapes(
-  weights: Record<string, number>
+  weights: Record<string, number>,
 ): Record<string, number> {
   const result: Record<string, number> = {};
 

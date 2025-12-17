@@ -419,7 +419,7 @@ model: "gpt-4"; // Options: gpt-4, gpt-4o, gpt-3.5-turbo, etc.
 
 Edit `public/emotion-detector.js`:
 
-```javascript
+````javascript
 const greetings = {
   happy: "Du siehst glücklich aus! Schön, dass es dir gut geht!",
   // Add more...
@@ -446,7 +446,7 @@ const greetings = {
 
 ```bash
 deno publish
-```
+````
 
 ### Deploy to Docker
 
