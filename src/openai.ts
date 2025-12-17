@@ -7,6 +7,8 @@
  * - Mammouth.ai (https://api.mammouth.ai/v1) - recommended, cheaper
  */
 
+import { Buffer } from "node:buffer";
+
 export interface OpenAIConfig {
   apiKey: string;
   model?: string;
@@ -200,10 +202,7 @@ export async function generateSpeech(
   text: string,
   config: OpenAIConfig
 ): Promise<TTSResult> {
-  const apiKey =
-    config.apiKey ||
-    Deno.env.get("MAMMOUTH_API_KEY") ||
-    Deno.env.get("OPENAI_API_KEY");
+  const apiKey = config.apiKey || Deno.env.get("OPENAI_API_KEY");
   if (!apiKey) {
     throw new Error("API key not configured");
   }
