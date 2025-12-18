@@ -188,7 +188,7 @@ http://localhost:1234/prod.html
        │ WebAudio API
        ▼
 ┌──────────────────┐     ┌─────────────┐
-│ Whisper (OpenAI) │────▶│   User Text  │
+│ Whisper (OpenAI) │────▶│   User Text │
 └──────────────────┘     └─────────────┘
        │                        │
        │                        ▼
@@ -209,8 +209,8 @@ http://localhost:1234/prod.html
        │
        ▼
 ┌──────────────────────────────────┐
-│  Three.js Avatar               │
-│  Speaks with mouth sync         │
+│  Three.js Avatar                 │
+│  Speaks with mouth sync          │
 └──────────────────────────────────┘
 ```
 
